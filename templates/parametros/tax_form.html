@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Nuevo tramo de renta{% endblock %}
+{% block content %}
+<h2>Nuevo tramo de renta</h2>
+<article>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <footer class="toolbar">
+      <button class="primary">Guardar</button>
+      <a href="/renta/" role="button" class="secondary">Cancelar</a>
+    </footer>
+  </form>
+</article>
+{% endblock %}

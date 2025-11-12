@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Tramos de Renta</h2>
+<a class="btn primary" href="{% url 'tax_create' %}">Agregar tramo</a>
+<table>
+  <thead><tr><th>Desde</th><th>Hasta</th><th>Cuota fija</th><th>% exceso</th><th></th></tr></thead>
+  <tbody>
+  {% for t in items %}
+    <tr>
+      <td>${{ t.desde }}</td><td>{% if t.hasta %}${{ t.hasta }}{% else %}∞{% endif %}</td>
+      <td>${{ t.cuota_fija }}</td><td>{{ t.tasa_exceso_pct }}%</td>
+      <td>
+        <form method="post" action="{% url 'tax_delete' t.pk %}">{% csrf_token %}<button class="btn">Eliminar</button></form>
+      </td>
+    </tr>
+  {% empty %}<tr><td colspan="5">Sin tramos.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

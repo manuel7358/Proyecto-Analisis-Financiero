@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<main class="container">
+  <h1>📥 Importar productos</h1>
+  <p>Sube un archivo <strong>CSV</strong> con los campos: <code>codigo, nombre, unidad</code>.</p>
+
+  <form method="post" enctype="multipart/form-data" style="margin-top:1rem;">
+    {% csrf_token %}
+    <input type="file" name="archivo" accept=".csv" required>
+    <button type="submit">Importar CSV</button>
+  </form>
+
+  <p style="margin-top:1rem;">
+    <a href="{% url 'productos_list' %}">⬅️ Volver a productos</a>
+  </p>
+
+  {% if messages %}
+  <ul>
+    {% for message in messages %}
+      <li style="color:{% if message.tags == 'error' %}red{% else %}green{% endif %};">
+        {{ message }}
+      </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</main>
+
+{% endblock %}

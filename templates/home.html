@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Inicio</h2>
+<p class="muted">Atajos rápidos:</p>
+<div class="stack">
+  <a class="btn" href="/productos/">Productos</a>
+  <a class="btn" href="/movimientos/">Movimientos</a>
+  <a class="btn" href="/empleados/">Empleados</a>
+  <a class="btn" href="/parametros/">Parámetros</a>
+  <a class="btn" href="/renta/">Renta</a>
+</div>
+
+<h3>Productos (muestra)</h3>
+<table>
+  <thead><tr><th>Código</th><th>Nombre</th><th>Reportes</th></tr></thead>
+  <tbody>
+    {% for p in productos %}
+    <tr>
+      <td>{{ p.codigo }}</td>
+      <td>{{ p.nombre }}</td>
+      <td>
+        <a class="btn" href="{% url 'reporte_inventario' p.id 'FIFO' %}">FIFO</a>
+        <a class="btn" href="{% url 'reporte_inventario' p.id 'LIFO' %}">LIFO</a>
+      </td>
+    </tr>
+    {% empty %}<tr><td colspan="3">No hay productos.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

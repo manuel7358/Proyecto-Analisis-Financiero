@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Planilla {{ periodo }}{% endblock %}
+{% block content %}
+<h3>Planilla del periodo {{ periodo }}</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Empleado</th><th>Salario</th><th>ISSS</th><th>AFP</th><th>Renta</th><th>Líquido</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for l in lineas %}
+      <tr>
+        <td>{{ l.empleado.nombre }}</td>
+        <td>${{ l.salario_base }}</td>
+        <td>${{ l.isss }}</td>
+        <td>${{ l.afp }}</td>
+        <td>${{ l.renta }}</td>
+        <td><strong>${{ l.liquido }}</strong></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6">No hay empleados activos.</td></tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><th colspan="5" style="text-align:right">Total líquido:</th><th>${{ total_liquido }}</th></tr>
+  </tfoot>
+</table>
+<p><a href="/">← Volver</a></p>
+{% endblock %}

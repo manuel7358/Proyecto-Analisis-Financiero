@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Planilla {{ periodo }}{% endblock %}
+{% block content %}
+<h2>Planilla {{ periodo.anio }}-{{ periodo.mes|add:"0"|slice:":2" }}</h2>
+<div class="toolbar">
+  <a role="button" href="{% url 'planilla_excel' periodo.anio periodo.mes %}">Exportar Excel</a>
+  <a role="button" href="{% url 'planilla_pdf' periodo.anio periodo.mes %}">Exportar PDF</a>
+</div>
+<table>
+  <thead>
+    <tr><th>Empleado</th><th>Salario</th><th>ISSS</th><th>AFP</th><th>Renta</th><th>Líquido</th></tr>
+  </thead>
+  <tbody>
+    {% for l in lineas %}
+      <tr>
+        <td>{{ l.empleado.nombre }}</td>
+        <td>${{ l.salario_base }}</td>
+        <td>${{ l.isss }}</td>
+        <td>${{ l.afp }}</td>
+        <td>${{ l.renta }}</td>
+        <td><strong>${{ l.liquido }}</strong></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6">No hay líneas.</td></tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><th colspan="5" style="text-align:right">Total líquido:</th><th>${{ total_liquido }}</th></tr>
+  </tfoot>
+</table>
+{% endblock %}

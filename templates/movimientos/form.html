@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} — Movimientos{% endblock %}
+{% block content %}
+<h2>{{ titulo }}</h2>
+<article>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <small class="muted">Nota: ENTRADA requiere costo unitario; SALIDA lo calcula el reporte.</small>
+    <footer class="toolbar">
+      <button class="primary" type="submit">Guardar</button>
+      <a href="/movimientos/" role="button" class="secondary">Cancelar</a>
+    </footer>
+  </form>
+</article>
+{% endblock %}

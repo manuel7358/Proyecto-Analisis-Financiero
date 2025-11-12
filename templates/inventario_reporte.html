@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Inventario {{ producto }} ({{ metodo }}){% endblock %}
+{% block content %}
+<h3>Inventario: {{ producto }} — Método {{ metodo }}</h3>
+
+<p><strong>Existencia:</strong> {{ existencia }} {{ producto.unidad }}<br>
+<strong>Costo total:</strong> ${{ costo_total }}<br>
+<strong>Costo promedio:</strong> ${{ costo_promedio }} por {{ producto.unidad }}</p>
+
+<h4>Capas restantes</h4>
+<table>
+  <thead><tr><th>Cantidad</th><th>Costo unitario</th><th>Subtotal</th></tr></thead>
+  <tbody>
+    {% for c in capas %}
+      <tr><td>{{ c.qty }}</td><td>${{ c.cost }}</td><td>${{ c.qty|floatformat:2|add:"0"|floatformat }}{{ c.qty*c.cost }}</td></tr>
+    {% empty %}
+      <tr><td colspan="3">Sin existencias.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p><a href="/">← Volver</a></p>
+{% endblock %}

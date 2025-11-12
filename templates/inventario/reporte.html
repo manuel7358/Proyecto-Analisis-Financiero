@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Inventario {{ producto }} — {{ metodo }}{% endblock %}
+{% block content %}
+<h2>Inventario: {{ producto }} — {{ metodo }}</h2>
+
+<div class="toolbar">
+  <a role="button" href="{% url 'inventario_excel' producto.id metodo %}">Exportar Excel</a>
+  <a role="button" href="{% url 'inventario_pdf' producto.id metodo %}">Exportar PDF</a>
+  <a role="button" href="{% url 'reporte_inventario' producto.id 'FIFO' %}">FIFO</a>
+  <a role="button" href="{% url 'reporte_inventario' producto.id 'LIFO' %}">LIFO</a>
+  <a role="button" class="secondary" href="/productos/">Volver</a>
+</div>
+
+<section class="grid">
+  <article id="entrada">
+    <header><strong>Nueva ENTRADA</strong></header>
+    <form method="post">
+      {% csrf_token %}
+      <div class="grid">
+        <label>Cantidad
+          <input type="number" name="cantidad" step="any" required>
+        </label>
+        <label>Costo unitario
+          <input type="number" name="costo_unitario" step="any" required>
+        </label>
+      </div>
+      <label>Referencia
+        <input type="text" name="referencia" maxlength="120">
+      </label>
+      <footer class="toolbar">
+        <button class="primary" type="submit" name="add_entrada">Agregar entrada</button>
+      </footer>
+    </form>
+  </article>
+
+  <article id="salida">
+    <header><strong>Nueva SALIDA</strong></header>
+    <form method="post">
+      {% csrf_token %}
+      <label>Cantidad
+        <input type="number" name="cantidad" step="any" required>
+      </label>
+      <label>Referencia
+        <input type="text" name="referencia" maxlength="120">
+      </label>
+      <footer class="toolbar">
+        <button class="contrast" type="submit" name="add_salida">Agregar salida</button>
+      </footer>
+    </form>
+  </article>
+</section>
+
+<section class="grid">
+  <article>
+    <header><strong>Existencia</strong></header>
+    <p style="font-size:1.2rem">{{ existencia }} {{ producto.unidad }}</p>
+  </article>
+  <article>
+    <header><strong>Costo total</strong></header>
+    <p style="font-size:1.2rem">${{ costo_total }}</p>
+  </article>
+  <article>
+    <header><strong>Promedio</strong></header>
+    <p style="font-size:1.2rem">${{ costo_promedio }}</p>
+  </article>
+</section>
+
+<h4>Capas restantes</h4>
+<table>
+  <thead><tr><th>Cantidad</th><th>Costo unitario</th><th>Subtotal</th></tr></thead>
+  <tbody>
+    {% for c in capas %}
+      <tr><td>{{ c.qty }}</td><td>${{ c.cost }}</td><td>${{ c.sub }}</td></tr>
+    {% empty %}
+      <tr><td colspan="3">Sin existencias</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

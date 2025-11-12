@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Parámetros de Planilla{% endblock %}
+{% block content %}
+<h2>Parámetros de Planilla</h2>
+<article>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <footer class="toolbar">
+      <button class="primary">Guardar</button>
+    </footer>
+  </form>
+</article>
+{% endblock %}

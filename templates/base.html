@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}SIFINCO{% endblock %}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Pico CSS (look minimal agradable) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    /* Ajustes suaves */
+    header, main, footer { max-width: 980px; margin: auto; padding: 1rem; }
+    .toolbar { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .muted { color: var(--muted-color); }
+    .brand { font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li class="brand">SIFINCO</li>
+      </ul>
+      <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/productos/">Productos</a></li>
+        <li><a href="/movimientos/">Movimientos</a></li>
+        <li><a href="/empleados/">Empleados</a></li>
+        <li><a href="/parametros/">Parámetros</a></li>
+        <li><a href="/renta/">Renta</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    {% if messages %}
+      {% for m in messages %}<article class="secondary">{{ m }}</article>{% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <small class="muted">Proyecto académico — Django + SQLite — UI minimal con Pico CSS</small>
+  </footer>
+</body>
+</html>
