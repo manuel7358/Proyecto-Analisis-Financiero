@@ -1,4 +1,4 @@
-# settings.py — listo para Render + Postgres (y fallback a SQLite local)
+# settings.py — listo para Render + Postgres (fallback a SQLite)
 import os
 from pathlib import Path
 import dj_database_url
@@ -8,14 +8,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ------------------------
 # Seguridad / Entorno
 # ------------------------
+def env_bool(v, default=False):
+    if v is None:
+        return default
+    return str(v).lower() in ("1", "true", "yes")
+
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'dev-secret-key-por-defecto-no-usar-en-produccion')
-
-# DEBUG desde variable de entorno: en Render pon DJANGO_DEBUG = False
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-
-# ALLOWED_HOSTS desde variable (coma-separados). Por ejemplo:
-# DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,miapp.onrender.com
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+DEBUG = env_bool(os.environ.get('DJANGO_DEBUG', 'False'))
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if h.strip()]
 
 # ------------------------
 # Aplicaciones y middleware
@@ -34,7 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',   # <<-- para servir estáticos en Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -51,7 +51,6 @@ ROOT_URLCONF = 'financiero.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # mantenemos templates/ en la raíz del proyecto
         'DIRS': [ BASE_DIR / 'templates' ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -69,7 +68,6 @@ WSGI_APPLICATION = 'financiero.wsgi.application'
 # ------------------------
 # Base de datos
 # ------------------------
-# Si existe DATABASE_URL (Render la provee), la usamos; si no, fallback a SQLite local.
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     DATABASES = {
@@ -97,7 +95,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internacionalización / timezone
 # ------------------------
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.environ.get('DJANGO_TIME_ZONE', 'UTC')
 USE_I18N = True
 USE_TZ = True
 
@@ -106,9 +104,7 @@ USE_TZ = True
 # ------------------------
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'                # collectstatic colocará aquí
-STATICFILES_DIRS = [ BASE_DIR / 'static' ]            # tu carpeta de assets en desarrollo
-
-# Storage recomendado para producción (whitenoise)
+STATICFILES_DIRS = [ BASE_DIR / 'static' ]            # desarrollo
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ------------------------
@@ -116,6 +112,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # ------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Recomendaciones de seguridad adicionales (opcional)
+# Seguridad recomendada
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'

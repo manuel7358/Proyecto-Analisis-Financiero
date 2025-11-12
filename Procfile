@@ -1,1 +1,1 @@
-web: gunicorn financiero.wsgi:application --bind 0.0.0.0:$PORT
+gunicorn financiero.wsgi:application --bind 0.0.0.0:$PORT
