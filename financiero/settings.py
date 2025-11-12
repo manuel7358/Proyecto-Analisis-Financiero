@@ -13,9 +13,34 @@ def env_bool(v, default=False):
         return default
     return str(v).lower() in ("1", "true", "yes")
 
+# SECRET_KEY from env (produce una robusta en producción)
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'dev-secret-key-por-defecto-no-usar-en-produccion')
+
+# DEBUG desde env (por defecto False en prod)
 DEBUG = env_bool(os.environ.get('DJANGO_DEBUG', 'False'))
-ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if h.strip()]
+
+# ALLOWED_HOSTS: puedes pasar DJANGO_ALLOWED_HOSTS como 'host1,host2'
+# Añadimos por defecto dominios de Railway y localhost para evitar 500/403 comunes
+DEFAULT_ALLOWED = '127.0.0.1,localhost,.up.railway.app,supportive-happiness.up.railway.app'
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', DEFAULT_ALLOWED).split(',') if h.strip()]
+
+# CSRF_TRUSTED_ORIGINS: Django requiere esquema (https://) para orígenes confiables
+# Puedes definir DJANGO_CSRF_TRUSTED_ORIGINS como 'https://a.com,https://b.com'
+csrf_env = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS')
+if csrf_env:
+    CSRF_TRUSTED_ORIGINS = [s.strip() for s in csrf_env.split(',') if s.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://supportive-happiness.up.railway.app',
+        # Si usas otro dominio custom añádelo aquí o usa la variable DJANGO_CSRF_TRUSTED_ORIGINS
+    ]
+
+# Si tu app está detrás de un proxy que termina TLS (como Railway), activa esta cabecera
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Cookies seguras en producción
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
 
 # ------------------------
 # Aplicaciones y middleware
@@ -115,3 +140,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Seguridad recomendada
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Fin del archivo
