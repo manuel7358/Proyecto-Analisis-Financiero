@@ -1,33 +1,70 @@
 {% extends "base.html" %}
 {% block title %}Empleados{% endblock %}
+
 {% block content %}
-<h2>Empleados</h2>
-<div class="toolbar">
-  <a href="{% url 'employee_create' %}" role="button" class="primary">Nuevo</a>
+
+<div class="card shadow-sm p-4 bg-white">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="m-0">Empleados</h2>
+
+        <a href="{% url 'employee_create' %}" class="btn btn-primary">
+            + Nuevo empleado
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>DUI</th>
+                    <th>Salario</th>
+                    <th>Activo</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for i in items %}
+                <tr>
+                    <td>{{ i.nombre }}</td>
+                    <td>{{ i.dui }}</td>
+                    <td>${{ i.salario_mensual }}</td>
+                    <td>
+                        {% if i.activo %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-center">
+
+                        <a href="{% url 'employee_edit' i.pk %}" class="btn btn-sm btn-warning">
+                            Editar
+                        </a>
+
+                        <form method="post" action="{% url 'employee_delete' i.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar empleado?');">
+                                Eliminar
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No hay empleados registrados</td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </div>
-<table>
-  <thead>
-    <tr><th>Nombre</th><th>DUI</th><th>Salario</th><th>Activo</th><th></th></tr>
-  </thead>
-  <tbody>
-    {% for i in items %}
-      <tr>
-        <td>{{ i.nombre }}</td>
-        <td>{{ i.dui }}</td>
-        <td>${{ i.salario_mensual }}</td>
-        <td>{{ i.activo }}</td>
-        <td>
-          <div class="toolbar">
-            <a role="button" href="{% url 'employee_edit' i.pk %}">Editar</a>
-            <form method="post" action="{% url 'employee_delete' i.pk %}" style="display:inline">{% csrf_token %}
-              <button class="secondary">Eliminar</button>
-            </form>
-          </div>
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="5">Sin datos</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+
 {% endblock %}
