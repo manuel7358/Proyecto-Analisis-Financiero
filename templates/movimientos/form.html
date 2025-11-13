@@ -1,16 +1,55 @@
 {% extends "base.html" %}
 {% block title %}{{ titulo }} — Movimientos{% endblock %}
 {% block content %}
-<h2>{{ titulo }}</h2>
-<article>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <small class="muted">Nota: ENTRADA requiere costo unitario; SALIDA lo calcula el reporte.</small>
-    <footer class="toolbar">
-      <button class="primary" type="submit">Guardar</button>
-      <a href="/movimientos/" role="button" class="secondary">Cancelar</a>
-    </footer>
-  </form>
-</article>
+<div class="container py-4">
+  <div class="card mx-auto" style="max-width:720px;">
+    <div class="card-body">
+      <h2>{{ titulo }}</h2>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">{{ form.producto.label }}</label>
+          {{ form.producto }}
+          {% for e in form.producto.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.fecha.label }}</label>
+          {{ form.fecha }}
+          {% for e in form.fecha.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.tipo.label }}</label>
+          {{ form.tipo }}
+          {% for e in form.tipo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.cantidad.label }}</label>
+          {{ form.cantidad }}
+          {% for e in form.cantidad.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.costo_unitario.label }}</label>
+          {{ form.costo_unitario }}
+          {% for e in form.costo_unitario.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.referencia.label }}</label>
+          {{ form.referencia }}
+          {% for e in form.referencia.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{% url 'move_list' %}" class="btn btn-secondary">Cancelar</a>
+          <button class="btn btn-primary" type="submit">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

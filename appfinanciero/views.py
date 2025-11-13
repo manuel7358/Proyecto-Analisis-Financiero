@@ -21,13 +21,20 @@ from django.utils import timezone            # ← FALTA ESTE
 from decimal import Decimal  
 
 def home(request):
-    productos = Product.objects.order_by('codigo')[:10]
+    ultimos_productos = Product.objects.order_by('-id')[:8]
+    ultimos_movimientos = InventoryMove.objects.order_by('-fecha')[:8]
+    total_productos = Product.objects.count()
+    total_empleados = Employee.objects.count()
+    movimientos_30d = InventoryMove.objects.filter(fecha__gte=timezone.now()-timezone.timedelta(days=30)).count()
     ultimo_periodo = PayrollPeriod.objects.first()
     return render(request, 'home.html', {
-        'productos': productos,
+        'ultimos_productos': ultimos_productos,
+        'ultimos_movimientos': ultimos_movimientos,
+        'total_productos': total_productos,
+        'total_empleados': total_empleados,
+        'movimientos_30d': movimientos_30d,
         'ultimo_periodo': ultimo_periodo
     })
-
 # -------- Productos --------
 def product_list(request):
     return render(request, 'productos/list.html', {'items': Product.objects.all()})

@@ -1,79 +1,105 @@
 {% extends "base.html" %}
 {% block title %}Inventario {{ producto }} — {{ metodo }}{% endblock %}
+
 {% block content %}
-<h2>Inventario: {{ producto }} — {{ metodo }}</h2>
-
-<div class="toolbar">
-  <a role="button" href="{% url 'inventario_excel' producto.id metodo %}">Exportar Excel</a>
-  <a role="button" href="{% url 'inventario_pdf' producto.id metodo %}">Exportar PDF</a>
-  <a role="button" href="{% url 'reporte_inventario' producto.id 'FIFO' %}">FIFO</a>
-  <a role="button" href="{% url 'reporte_inventario' producto.id 'LIFO' %}">LIFO</a>
-  <a role="button" class="secondary" href="/productos/">Volver</a>
-</div>
-
-<section class="grid">
-  <article id="entrada">
-    <header><strong>Nueva ENTRADA</strong></header>
-    <form method="post">
-      {% csrf_token %}
-      <div class="grid">
-        <label>Cantidad
-          <input type="number" name="cantidad" step="any" required>
-        </label>
-        <label>Costo unitario
-          <input type="number" name="costo_unitario" step="any" required>
-        </label>
+<div class="card shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <h3 class="mb-0">Inventario: {{ producto }}</h3>
+        <div class="text-muted">Método: {{ metodo }}</div>
       </div>
-      <label>Referencia
-        <input type="text" name="referencia" maxlength="120">
-      </label>
-      <footer class="toolbar">
-        <button class="primary" type="submit" name="add_entrada">Agregar entrada</button>
-      </footer>
-    </form>
-  </article>
 
-  <article id="salida">
-    <header><strong>Nueva SALIDA</strong></header>
-    <form method="post">
-      {% csrf_token %}
-      <label>Cantidad
-        <input type="number" name="cantidad" step="any" required>
-      </label>
-      <label>Referencia
-        <input type="text" name="referencia" maxlength="120">
-      </label>
-      <footer class="toolbar">
-        <button class="contrast" type="submit" name="add_salida">Agregar salida</button>
-      </footer>
-    </form>
-  </article>
-</section>
+      <div class="btn-group">
+        <a class="btn btn-outline-secondary" href="{% url 'inventario_excel' producto.id metodo %}">Exportar Excel</a>
+        <a class="btn btn-outline-secondary" href="{% url 'inventario_pdf' producto.id metodo %}">Exportar PDF</a>
+        <a class="btn btn-outline-secondary" href="{% url 'reporte_inventario' producto.id 'FIFO' %}">FIFO</a>
+        <a class="btn btn-outline-secondary" href="{% url 'reporte_inventario' producto.id 'LIFO' %}">LIFO</a>
+      </div>
+    </div>
 
-<section class="grid">
-  <article>
-    <header><strong>Existencia</strong></header>
-    <p style="font-size:1.2rem">{{ existencia }} {{ producto.unidad }}</p>
-  </article>
-  <article>
-    <header><strong>Costo total</strong></header>
-    <p style="font-size:1.2rem">${{ costo_total }}</p>
-  </article>
-  <article>
-    <header><strong>Promedio</strong></header>
-    <p style="font-size:1.2rem">${{ costo_promedio }}</p>
-  </article>
-</section>
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div class="card p-3">
+          <div class="text-muted">Existencia</div>
+          <div class="h5">{{ existencia }} {{ producto.unidad }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3">
+          <div class="text-muted">Costo total</div>
+          <div class="h6">${{ costo_total }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3">
+          <div class="text-muted">Promedio</div>
+          <div class="h6">${{ costo_promedio }}</div>
+        </div>
+      </div>
+    </div>
 
-<h4>Capas restantes</h4>
-<table>
-  <thead><tr><th>Cantidad</th><th>Costo unitario</th><th>Subtotal</th></tr></thead>
-  <tbody>
-    {% for c in capas %}
-      <tr><td>{{ c.qty }}</td><td>${{ c.cost }}</td><td>${{ c.sub }}</td></tr>
-    {% empty %}
-      <tr><td colspan="3">Sin existencias</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <div class="mb-3">
+      <h5>Agregar movimiento rápido</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="entrada">
+            <div class="mb-2">
+              <label class="form-label">Cantidad</label>
+              <input name="cantidad" type="number" step="any" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Costo unitario</label>
+              <input name="costo_unitario" type="number" step="any" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Referencia</label>
+              <input name="referencia" type="text" class="form-control">
+            </div>
+            <button name="add_entrada" class="btn btn-primary">Agregar entrada</button>
+          </form>
+        </div>
+
+        <div class="col-md-6">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="salida">
+            <div class="mb-2">
+              <label class="form-label">Cantidad</label>
+              <input name="cantidad" type="number" step="any" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Referencia</label>
+              <input name="referencia" type="text" class="form-control">
+            </div>
+            <button name="add_salida" class="btn btn-outline-secondary">Agregar salida</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <h5>Capas restantes</h5>
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead class="table-light">
+          <tr><th>Cantidad</th><th class="text-end">Costo unitario</th><th class="text-end">Subtotal</th></tr>
+        </thead>
+        <tbody>
+          {% for c in capas %}
+            <tr>
+              <td>{{ c.qty }}</td>
+              <td class="text-end">${{ c.cost }}</td>
+              <td class="text-end">${{ c.sub }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="text-center text-muted">Sin existencias</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
 {% endblock %}
