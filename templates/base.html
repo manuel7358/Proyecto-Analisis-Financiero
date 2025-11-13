@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>{% block title %}SIFINCO{% endblock %}</title>
+  <title>{% block title %}Analsis Financiero{% endblock %}</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <!-- Pico CSS (look minimal agradable) -->
+  
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <style>
-    /* Ajustes suaves */
+   
     header, main, footer { max-width: 980px; margin: auto; padding: 1rem; }
     .toolbar { display: flex; gap: .5rem; flex-wrap: wrap; }
     .muted { color: var(--muted-color); }
@@ -15,22 +15,24 @@
   </style>
 </head>
 <body>
-  <header>
-    <nav>
-      <ul>
-        <li class="brand">SIFINCO</li>
-      </ul>
-      <ul>
-        <li><a href="/">Inicio</a></li>
-        <li><a href="/productos/">Productos</a></li>
-        <li><a href="/movimientos/">Movimientos</a></li>
-        <li><a href="/empleados/">Empleados</a></li>
-        <li><a href="/parametros/">Parámetros</a></li>
-        <li><a href="/renta/">Renta</a></li>
-      </ul>
-    </nav>
-  </header>
 
+    <header class="bg-white shadow">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <nav class="hidden md:flex items-center gap-6 text-sm">
+          <span class="brand">Proyecto Análisis Financiero</span>
+          <a href="/" class="hover:text-gray-900">Inicio</a>
+          <a href="/productos/" class="hover:text-gray-900">Productos</a>
+          <a href="/movimientos/" class="hover:text-gray-900">Movimientos</a>
+          <a href="/empleados/" class="hover:text-gray-900">Empleados</a>
+        </nav>
+
+        
+      </div>
+    </div>
+  </header>
+  
   <main>
     {% if messages %}
       {% for m in messages %}<article class="secondary">{{ m }}</article>{% endfor %}
@@ -39,7 +41,7 @@
   </main>
 
   <footer>
-    <small class="muted">Proyecto académico — Django + SQLite — UI minimal con Pico CSS</small>
+    <small class="muted">Proyecto Analisis Financiero</small>
   </footer>
 </body>
 </html>
