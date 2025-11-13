@@ -45,4 +45,6 @@ urlpatterns = [
     path("productos/export/csv/", views.productos_csv, name="productos_csv"),
     path("productos/export/pdf/", views.productos_pdf, name="productos_pdf"),
     path("productos/plantilla/csv/", views.productos_plantilla_csv, name="productos_plantilla_csv"),
+
+    path("integrantes/", views.integrantes, name="integrantes"),
 ]

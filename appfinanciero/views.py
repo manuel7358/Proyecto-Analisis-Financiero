@@ -530,3 +530,7 @@ def productos_plantilla_csv(request):
     # writer.writerow(["P002", "Tuerca 5mm", "unid"])
 
     return resp
+
+def integrantes(request):
+    integrantes = ["Manuel", "Johan", "Felipe"]
+    return render(request, "integrantes.html", {"integrantes": integrantes})

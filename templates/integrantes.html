@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Integrantes{% endblock %}
+
+{% block content %}
+<div class="card-root sm mx-auto">
+    <h2 class="text-2xl font-semibold mb-4">Integrantes del proyecto</h2>
+
+    <ul class="list-disc pl-6 text-lg leading-relaxed">
+        {% for nombre in integrantes %}
+            <li>{{ nombre }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
