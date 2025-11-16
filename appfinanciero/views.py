@@ -5,6 +5,7 @@ from django.contrib import messages
 from .models import Product, InventoryMove, Employee, PayrollPeriod, PayrollConfig, TaxBracket
 from .forms import ProductForm, InventoryMoveForm, EmployeeForm, PayrollConfigForm, TaxBracketForm
 from .services import valuacion_inventario, generar_planilla, _get_config
+from .models import InventoryMove, PayrollConfig, TaxBracket, PayrollLine, PayrollPeriod, Employee
 
 from io import BytesIO
 from django.http import HttpResponse
@@ -12,6 +13,7 @@ from openpyxl import Workbook
 from reportlab.lib.pagesizes import LETTER
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
+from decimal import Decimal, ROUND_HALF_UP
 from reportlab.lib.styles import getSampleStyleSheet
 from .forms import (
     ProductForm, InventoryMoveForm, EmployeeForm, PayrollConfigForm, TaxBracketForm,
@@ -19,6 +21,12 @@ from .forms import (
 )
 from django.utils import timezone            # ← FALTA ESTE
 from decimal import Decimal  
+import datetime
+from decimal import Decimal
+
+# appfinanciero/views.py (sustituir la función home existente)
+from decimal import Decimal, ROUND_HALF_UP
+from django.db import models   # si ya lo importaste arriba, no lo dupliques
 
 def home(request):
     ultimos_productos = Product.objects.order_by('-id')[:8]
@@ -26,15 +34,47 @@ def home(request):
     total_productos = Product.objects.count()
     total_empleados = Employee.objects.count()
     movimientos_30d = InventoryMove.objects.filter(fecha__gte=timezone.now()-timezone.timedelta(days=30)).count()
-    ultimo_periodo = PayrollPeriod.objects.first()
+
+    # obtener el último periodo (orden descendente por año/mes)
+    ultimo_periodo = PayrollPeriod.objects.order_by('-anio', '-mes').first()
+
+    lineas_planilla = []
+    total_liquido = Decimal('0.00')
+
+    if ultimo_periodo:
+        # generar planilla (si algo falla no rompe la página)
+        try:
+            generar_planilla(ultimo_periodo)
+        except Exception as e:
+            messages.error(request, f"Error al generar planilla: {e}")
+
+        # traer primeras N líneas para mostrar en el dashboard
+        qs = ultimo_periodo.lineas.select_related('empleado').order_by('empleado__nombre')[:6]
+        for l in qs:
+            # asegurar formato decimal a 2 decimales
+            l.salario_base = (l.salario_base or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            l.isss = (l.isss or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            l.afp = (l.afp or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            l.renta = (l.renta or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            l.liquido = (l.liquido or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        lineas_planilla = list(qs)
+
+        # suma total líquido del periodo
+        agg = ultimo_periodo.lineas.aggregate(total=models.Sum('liquido'))
+        total_liquido = (agg.get('total') or Decimal('0.00'))
+        total_liquido = Decimal(total_liquido).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
     return render(request, 'home.html', {
         'ultimos_productos': ultimos_productos,
         'ultimos_movimientos': ultimos_movimientos,
         'total_productos': total_productos,
         'total_empleados': total_empleados,
         'movimientos_30d': movimientos_30d,
-        'ultimo_periodo': ultimo_periodo
+        'ultimo_periodo': ultimo_periodo,
+        'lineas_planilla': lineas_planilla,
+        'total_liquido': total_liquido,
     })
+
 # -------- Productos --------
 def product_list(request):
     return render(request, 'productos/list.html', {'items': Product.objects.all()})
@@ -134,7 +174,9 @@ def reporte_inventario(request, producto_id, metodo):
 
 # -------- Empleados --------
 def employee_list(request):
-    return render(request, 'empleados/list.html', {'items': Employee.objects.all()})
+    items = Employee.objects.order_by("nombre")
+    form = EmployeeForm()  # formulario para usar en el modal
+    return render(request, 'empleados/list.html', {'items': items, 'form': form})
 
 def employee_create(request):
     form = EmployeeForm(request.POST or None)
@@ -181,11 +223,54 @@ def tax_delete(request, pk):
 
 # -------- Planilla --------
 def planilla_periodo(request, anio, mes):
-    periodo, _ = PayrollPeriod.objects.get_or_create(anio=anio, mes=mes)
-    lineas = generar_planilla(periodo)
-    total_liquido = sum(l.liquido for l in lineas)
-    return render(request, 'planilla/planilla.html', {'periodo': periodo, 'lineas': lineas, 'total_liquido': total_liquido})
+    """
+    Muestra y (re)genera la planilla para el periodo (anio, mes).
+    - GET: muestra la planilla (y la genera si no existe).
+    - POST: regenera (recalcula) la planilla y vuelve a mostrarla.
+    """
+    # obtener/crear objeto periodo
+    periodo, created = PayrollPeriod.objects.get_or_create(anio=anio, mes=mes)
 
+    # Si viene POST -> forzar regeneración (por ejemplo desde el botón "Generar/Recalcular")
+    if request.method == 'POST':
+        try:
+            generar_planilla(periodo)  # actualizar/crear líneas
+            messages.success(request, f"Planilla {periodo} (re)generada correctamente.")
+            return redirect('planilla_periodo', anio=anio, mes=mes)
+        except Exception as e:
+            messages.error(request, f"Error al generar planilla: {e}")
+
+    # Asegurarnos de que la planilla está generada al menos una vez
+    # generar_planilla siempre hace update_or_create, así nos aseguramos de tener las líneas.
+    try:
+        generar_planilla(periodo)
+    except Exception as e:
+        messages.error(request, f"Error al generar planilla: {e}")
+
+    # Recuperar líneas y formatear valores para la plantilla
+    lineas = periodo.lineas.select_related('empleado').all().order_by('empleado__nombre')
+
+    # Normalizar y asegurar que los campos monetarios estén con 2 decimales
+    for l in lineas:
+        # si por algún motivo son None (seguro no lo serán), poner 0.00
+        l.salario_base = (l.salario_base or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        l.isss = (l.isss or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        l.afp = (l.afp or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        l.renta = (l.renta or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        l.otras_deducciones = (l.otras_deducciones or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        l.liquido = (l.liquido or Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    total_liquido = sum((l.liquido for l in lineas), Decimal('0.00')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    # PASAMOS también la configuración actual para mostrar parámetros (opcional)
+    cfg = _get_config()
+
+    return render(request, 'planilla/planilla.html', {
+        'periodo': periodo,
+        'lineas': lineas,
+        'total_liquido': total_liquido,
+        'cfg': cfg,
+    })
 def planilla_excel(request, anio, mes):
     periodo, _ = PayrollPeriod.objects.get_or_create(anio=anio, mes=mes)
     lineas = generar_planilla(periodo)
@@ -541,3 +626,22 @@ def productos_plantilla_csv(request):
 def integrantes(request):
     integrantes = ["Manuel", "Johan", "Felipe"]
     return render(request, "integrantes.html", {"integrantes": integrantes})
+
+@require_http_methods(['POST'])
+def generar_planilla_now(request):
+    """
+    Crea/usa el periodo actual (año, mes) y (re)genera las líneas de planilla.
+    Llama a generar_planilla(periodo) y muestra un mensaje.
+    Redirige al home.
+    """
+    try:
+        hoy = datetime.date.today()
+        periodo, created = PayrollPeriod.objects.get_or_create(anio=hoy.year, mes=hoy.month)
+        generar_planilla(periodo)
+        if created:
+            messages.success(request, f"Planilla {periodo} generada (nuevo periodo).")
+        else:
+            messages.success(request, f"Planilla {periodo} regenerada correctamente.")
+    except Exception as e:
+        messages.error(request, f"Error al generar planilla: {e}")
+    return redirect('home')

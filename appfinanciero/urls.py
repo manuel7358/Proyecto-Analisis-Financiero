@@ -54,7 +54,13 @@ urlpatterns = [
     path('planilla/<int:anio>/<int:mes>/', views.planilla_periodo, name='planilla_periodo'),
     path('planilla/<int:anio>/<int:mes>/excel/', views.planilla_excel, name='planilla_excel'),
     path('planilla/<int:anio>/<int:mes>/pdf/', views.planilla_pdf, name='planilla_pdf'),
+    path('planilla/generar/', views.generar_planilla_now, name='generar_planilla_now'),
+
+    
 
     # ---------- Integrantes ----------
     path('integrantes/', views.integrantes, name='integrantes'),
+
+    path('empleados/nuevo/', views.employee_create, name='employee_create'),
+
 ]

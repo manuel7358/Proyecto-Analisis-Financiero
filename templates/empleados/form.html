@@ -1,45 +1,59 @@
 {% extends "base.html" %}
-{% block title %}{{ titulo }} — Empleados{% endblock %}
+{% block title %}{{ titulo }} — Movimientos{% endblock %}
+{% load form_extras %}
 {% block content %}
 <div class="container py-4">
-  <div class="card mx-auto" style="max-width:700px;">
+  <div class="card mx-auto shadow-sm" style="max-width:720px;">
     <div class="card-body">
-      <h2>{{ titulo }}</h2>
+      <h3 class="mb-4">{{ titulo }}</h3>
+
       <form method="post" novalidate>
         {% csrf_token %}
 
-        <div class="mb-3 form-check">
-          {{ form.activo }}
-          <label class="form-check-label" for="{{ form.activo.id_for_label }}">{{ form.activo.label }}</label>
-          {% for e in form.activo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
-        </div>
-
+        <!-- Producto -->
         <div class="mb-3">
-          <label class="form-label">{{ form.dui.label }}</label>
-          {{ form.dui }}
-          {% for e in form.dui.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          <label class="form-label">{{ form.producto.label }}</label>
+          {{ form.producto }}
+          {% for e in form.producto.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
         </div>
 
+        <!-- Fecha -->
         <div class="mb-3">
-          <label class="form-label">{{ form.nombre.label }}</label>
-          {{ form.nombre }}
-          {% for e in form.nombre.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          <label class="form-label">{{ form.fecha.label }}</label>
+          {{ form.fecha }}
+          {% for e in form.fecha.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
         </div>
 
+        <!-- Tipo -->
         <div class="mb-3">
-          <label class="form-label">{{ form.salario_mensual.label }}</label>
-          {{ form.salario_mensual }}
-          {% for e in form.salario_mensual.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          <label class="form-label">{{ form.tipo.label }}</label>
+          {{ form.tipo }}
+          {% for e in form.tipo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
         </div>
 
+        <!-- Cantidad -->
         <div class="mb-3">
-          <label class="form-label">{{ form.fecha_ingreso.label }}</label>
-          {{ form.fecha_ingreso }}
-          {% for e in form.fecha_ingreso.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          <label class="form-label">{{ form.cantidad.label }}</label>
+          {{ form.cantidad }}
+          {% for e in form.cantidad.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
         </div>
 
-        <div class="d-flex justify-content-end gap-2">
-          <a href="/empleados/" class="btn btn-secondary">Cancelar</a>
+        <!-- Costo unitario -->
+        <div class="mb-3">
+          <label class="form-label">{{ form.costo_unitario.label }}</label>
+          {{ form.costo_unitario }}
+          {% for e in form.costo_unitario.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+
+        <!-- Referencia -->
+        <div class="mb-3">
+          <label class="form-label">{{ form.referencia.label }}</label>
+          {{ form.referencia }}
+          {% for e in form.referencia.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <a href="{% url 'move_list' %}" class="btn btn-secondary">Cancelar</a>
           <button class="btn btn-primary" type="submit">Guardar</button>
         </div>
       </form>
